@@ -13,6 +13,9 @@ dependencies {
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:4.11.0")
     implementation("org.mongodb:bson-kotlinx:4.11.0")
     implementation("net.dv8tion:JDA:5.0.0-beta.21")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.14.2")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.14.2")
 }
 
 configurations.implementation.configure {

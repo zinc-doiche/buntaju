@@ -1,0 +1,10 @@
+discordToken: token here
+openAIToken: token here
+database:
+  user: admin
+  password: 1234
+  uri: localhost
+  port: 27017
+  database: buntaju
+  options:
+    authSource: admin
