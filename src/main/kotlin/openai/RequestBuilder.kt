@@ -7,15 +7,15 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import zinc.doiche.jda
 import zinc.doiche.json
-import zinc.doiche.openAIToken
+import zinc.doiche.aiToken
 
-private const val OPENAI_API_URL = "https://api.openai.com/v1/"
+private const val API_URL = "https://generativelanguage.googleapis.com/v1beta/models/"
 
 class RequestBuilder private constructor() {
-    private var endpoint: String? = null
+    private var model: String? = null
 
-    fun endpoint(endpoint: String): RequestBuilder {
-        this.endpoint = endpoint
+    fun model(model: String): RequestBuilder {
+        this.model = model
         return this
     }
 
@@ -23,12 +23,11 @@ class RequestBuilder private constructor() {
         async {
             Request.Builder()
                 .method(
-                    "get", json.writeValueAsString(obj)
+                    "POST", json.writeValueAsString(obj)
                         .toRequestBody("application/json".toMediaType())
                 )
-                .url(OPENAI_API_URL)
-//            .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization", "Bearer $openAIToken")
+                .url("$API_URL$model:generateContent?key=$aiToken")
+                .addHeader("Content-Type", "application/json")
                 .build().let {
                     jda.httpClient.newCall(it).execute()
                 }
@@ -36,7 +35,7 @@ class RequestBuilder private constructor() {
     }
 
     companion object {
-        fun create(): RequestBuilder {
+        fun builder(): RequestBuilder {
             return RequestBuilder()
         }
     }

@@ -4,9 +4,9 @@ import com.mongodb.kotlin.client.coroutine.FindFlow
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
 import net.dv8tion.jda.api.entities.Guild
-import zinc.doiche.database.Collectable
-import zinc.doiche.database.MongoDB
-import zinc.doiche.database.eq
+import zinc.doiche.lib.database.Collectable
+import zinc.doiche.lib.database.MongoDB
+import zinc.doiche.lib.database.eq
 import zinc.doiche.jda
 
 data class Server(

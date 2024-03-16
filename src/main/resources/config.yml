@@ -1,5 +1,5 @@
 discordToken: token here
-openAIToken: token here
+aiToken: token here
 database:
   user: admin
   password: 1234

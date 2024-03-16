@@ -1,9 +1,10 @@
-package zinc.doiche.database
+package zinc.doiche.lib.database
 
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import kotlinx.coroutines.runBlocking
+import zinc.doiche.logger
 
 object MongoDB {
     lateinit var mongoClient: MongoClient

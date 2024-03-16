@@ -5,9 +5,9 @@ import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
-import zinc.doiche.database.Collectable
-import zinc.doiche.database.MongoDB
-import zinc.doiche.database.eq
+import zinc.doiche.lib.database.Collectable
+import zinc.doiche.lib.database.MongoDB
+import zinc.doiche.lib.database.eq
 import zinc.doiche.jda
 
 data class Channel(

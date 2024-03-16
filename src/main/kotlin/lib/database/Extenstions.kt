@@ -1,4 +1,4 @@
-package zinc.doiche.database
+package zinc.doiche.lib.database
 
 import com.mongodb.client.model.Filters
 import org.bson.conversions.Bson

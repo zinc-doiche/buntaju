@@ -1,4 +1,4 @@
-package zinc.doiche.database
+package zinc.doiche.lib.database
 
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 

@@ -2,7 +2,7 @@ package zinc.doiche.lib
 
 data class Config(
     val discordToken: String,
-    val openAIToken: String,
+    val aiToken: String,
     val database: Database
 )
 
@@ -22,9 +22,9 @@ data class Database(
         } else ""
 
         return if(user == null || password == null) {
-            "mongodb://$uri:$port/$database$option"
+            "mongodb://$uri:$port/$database?$option"
         } else {
-            "mongodb://$user:$password@$uri:$port/$database$option"
+            "mongodb://$user:$password@$uri:$port/$database?$option"
         }
     }
 }
