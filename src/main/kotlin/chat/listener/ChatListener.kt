@@ -44,7 +44,7 @@ class ChatListener {
             textChannel.sendTyping().queue()
 
             val chats = Chat.findAllByChannelId(textChannel.idLong).toList()
-            val contents = chats.map { it.toContent() }.toList() as ArrayList
+            val contents = ArrayList(chats.map { it.toContent() }.toList())
             val part = Part("${member.nickname}: ${message.contentRaw}")
             contents.add(Content("user", arrayOf(part)))
 
