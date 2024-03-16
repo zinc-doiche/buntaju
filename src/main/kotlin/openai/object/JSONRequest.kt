@@ -68,10 +68,10 @@ enum class Threshold {
 
 data class GenerationConfig(
     val stopSequences: Array<String> = arrayOf("Title"),
-    val temperature: Double = 0.9,
+    val temperature: Double = 0.3,
     val maxOutputTokens: Int = 800,
     val topP: Double = 0.8,
-    val topK: Double = 10.0
+    val topK: Double = 5.0
 ) {
     override fun toString(): String {
         return "GenerationConfig(stopSequences=${stopSequences.contentToString()}, temperature=$temperature, maxOutputTokens=$maxOutputTokens, topP=$topP, topK=$topK)"

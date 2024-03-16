@@ -43,14 +43,19 @@ class ChatListener {
 
             textChannel.sendTyping().queue()
 
-            val history = Chat.findAllByChannelId(textChannel.idLong).map { it.toContent() }.toList() as ArrayList
+            val chats = Chat.findAllByChannelId(textChannel.idLong).toList()
+            val contents = chats.map { it.toContent() }.toList() as ArrayList
             val part = Part("${member.nickname}: ${message.contentRaw}")
-            history.add(Content("user", arrayOf(part)))
+            contents.add(Content("user", arrayOf(part)))
+
+            if(contents.size > 30) {
+                Chat.deleteBefore(chats[contents.size - 30])
+            }
 
             RequestBuilder.builder()
                 .model("gemini-pro")
                 .request(
-                    JSONRequest(history.toTypedArray())//.apply { logger.info(this.toString()) }
+                    JSONRequest(contents.toTypedArray())//.apply { logger.info(this.toString()) }
                 )
                 .await().use { response ->
                     val body = response.body ?: return@runBlocking
@@ -64,7 +69,7 @@ class ChatListener {
                     }
 
                     val text = jsonResponse.text ?: return@runBlocking
-                    //logger.info(jsonResponse.toString())
+                    logger.info(jsonResponse.toString())
                     Chat.save(message)
                     textChannel.sendMessage(text).queue { message ->
                         runBlocking { Chat.save(message) }

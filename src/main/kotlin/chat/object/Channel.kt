@@ -6,17 +6,20 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import org.bson.BsonObjectId
+import org.bson.codecs.pojo.annotations.BsonId
 import zinc.doiche.lib.database.Collectable
 import zinc.doiche.lib.database.MongoDB
 import zinc.doiche.lib.database.eq
 import zinc.doiche.jda
 
 data class Channel(
+    @BsonId
     val id: BsonObjectId,
     val channelId: Long,
     val guildId: Long,
     val name: String
 ) {
+
     constructor(channelId: Long, guildId: Long, name: String): this(BsonObjectId(), channelId, guildId, name)
 
     val messages: FindFlow<Chat>

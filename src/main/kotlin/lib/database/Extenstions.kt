@@ -9,6 +9,12 @@ import kotlin.reflect.KCallable
 
 internal infix fun KCallable<*>.eq(value: Any): Bson = Filters.eq(this.name, value)
 
+internal infix fun KCallable<*>.gt(value: Any): Bson = Filters.gt(this.name, value)
+internal infix fun KCallable<*>.gte(value: Any): Bson = Filters.gte(this.name, value)
+
+internal infix fun KCallable<*>.lt(value: Any): Bson = Filters.lt(this.name, value)
+internal infix fun KCallable<*>.lte(value: Any): Bson = Filters.lte(this.name, value)
+
 internal infix fun Bson.and(other: Bson): Bson = Filters.and(this, other)
 
 internal infix fun Bson.or(other: Bson): Bson = Filters.or(this, other)

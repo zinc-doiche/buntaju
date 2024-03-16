@@ -1,5 +1,6 @@
 package zinc.doiche.chat.`object`
 
+import com.mongodb.client.model.DeleteOptions
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
 import net.dv8tion.jda.api.entities.Message
@@ -56,5 +57,7 @@ data class Chat(
         suspend fun update(chat: Chat) = collection.updateOne(Chat::id eq chat.id, set(chat))
 
         suspend fun delete(chat: Chat) = collection.deleteOne(Chat::id eq chat.id)
+
+        suspend fun deleteBefore(chat: Chat) = collection.deleteMany(Chat::id lte chat.id)
     }
 }
