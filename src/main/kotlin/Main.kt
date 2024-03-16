@@ -3,11 +3,13 @@ package zinc.doiche
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.internal.JDAImpl
+import okhttp3.Cache
 import okhttp3.OkHttpClient
 import org.slf4j.Logger
 import zinc.doiche.chat.listener.ChatListener
@@ -25,6 +27,12 @@ internal lateinit var jda: JDA
 internal lateinit var logger: Logger
     private set
 
+internal lateinit var openAIToken: String
+    private set
+
+internal lateinit var json: ObjectMapper
+    private set
+
 @Throws(InterruptedException::class)
 fun main() {
     val config = loadConfig()
@@ -32,10 +40,11 @@ fun main() {
     val discordToken = config.discordToken
     val databaseURI = config.database.getConnectionString()
     val databaseName = config.database.getName()
-    //val openAIToken = args[3]
 
+    openAIToken = config.openAIToken
     jda = createJDA(discordToken)
     logger = JDAImpl.LOG
+    json = jacksonObjectMapper()
 
     MongoDB.register(databaseURI, databaseName)
     FoundCommand().register()
