@@ -44,12 +44,15 @@ class ChatListener {
             textChannel.sendTyping().queue()
 
             val chats = Chat.findAllByChannelId(textChannel.idLong).toList()
-            val contents = ArrayList(chats.map { it.toContent() }.toList())
+            val history = ArrayList(chats.map { it.toContent() }.toList())
             val part = Part("${member.nickname}: ${message.contentRaw}")
-            contents.add(Content("user", arrayOf(part)))
+            history.add(Content("user", arrayOf(part)))
 
-            if(contents.size > 30) {
-                Chat.deleteBefore(chats[contents.size - 30])
+            val contents = if(history.size > 30) {
+                Chat.deleteBefore(chats[history.size - 30])
+                history.subList(history.size - 30, history.size - 1)
+            } else {
+                history
             }
 
             RequestBuilder.builder()
