@@ -3,24 +3,41 @@ package zinc.doiche.chat.`object`
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
 import net.dv8tion.jda.api.entities.Message
-import zinc.doiche.lib.database.Collectable
-import zinc.doiche.lib.database.MongoDB
+import org.bson.BsonObjectId
+import org.bson.codecs.pojo.annotations.BsonId
+import zinc.doiche.jda
+import zinc.doiche.lib.database.*
 import zinc.doiche.lib.database.eq
+import zinc.doiche.lib.database.set
+import zinc.doiche.openai.`object`.Content
+import zinc.doiche.openai.`object`.Part
 import java.time.LocalDateTime
 
 data class Chat(
+    @BsonId
+    val id: BsonObjectId,
     val senderId: Long,
     val senderName: String,
     val channelId: Long,
-    val createdDateTime: LocalDateTime,
-    val content: String
+    var createdDateTime: LocalDateTime,
+    var content: String
 ) {
-    val requestText = "$senderName: $content"
+    constructor(
+        senderId: Long,
+        senderName: String,
+        channelId: Long,
+        createdDateTime: LocalDateTime,
+        content: String
+    ): this(BsonObjectId(), senderId, senderName, channelId, createdDateTime, content)
+
+    val isUser = senderId != jda.selfUser.idLong
+
+    fun toContent() = Content(if(isUser) "user" else "model", arrayOf(Part("$senderName: $content")))
 
     companion object : Collectable<Message, Chat> {
         override val collection: MongoCollection<Chat> = MongoDB.getCollection<Chat>("messages")
 
-        override suspend fun findById(id: Long): Chat? = collection.find(Chat::channelId eq id).firstOrNull()
+        override suspend fun findById(id: BsonObjectId): Chat? = collection.find(Chat::id eq id).firstOrNull()
 
         override suspend fun save(entity: Message): Chat = Chat(
             entity.author.idLong,
@@ -35,5 +52,9 @@ data class Chat(
         suspend fun save(chat: Chat) = collection.insertOne(chat)
 
         fun findAllByChannelId(channelId: Long) = collection.find(Chat::channelId eq channelId)
+
+        suspend fun update(chat: Chat) = collection.updateOne(Chat::id eq chat.id, set(chat))
+
+        suspend fun delete(chat: Chat) = collection.deleteOne(Chat::id eq chat.id)
     }
 }

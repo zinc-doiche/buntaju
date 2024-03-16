@@ -18,11 +18,11 @@ internal fun foundCommand() = CommandFactory.create(
 
     runBlocking {
         async {
-            Server.findById(guild.idLong) ?: Server.save(guild)
+            Server.findByGuildId(guild.idLong) ?: Server.save(guild)
             val textChannel = event.channel as? TextChannel ?: run {
                 return@async "텍스트 채널에서만 사용할 수 있어요."
             }
-            Channel.findById(textChannel.idLong)?.let {
+            Channel.findByChannelId(textChannel.idLong)?.let {
                 return@async "'${textChannel.name}' 채널은 이미 등록되어 있어요."
             } ?: Channel.save(textChannel)
 

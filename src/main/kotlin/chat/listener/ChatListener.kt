@@ -1,16 +1,12 @@
 package zinc.doiche.chat.listener
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.SubscribeEvent
-import okhttp3.RequestBody
-import okhttp3.Response
-import okhttp3.ResponseBody
 import zinc.doiche.chat.`object`.Channel
 import zinc.doiche.chat.`object`.Chat
 import zinc.doiche.json
@@ -21,65 +17,59 @@ import zinc.doiche.openai.`object`.Part
 import zinc.doiche.openai.RequestBuilder
 import zinc.doiche.openai.`object`.JSONResponse
 
+private const val DELAY = 3000L
+
 class ChatListener {
+    private var lastMessageTime = 0L
 
     @SubscribeEvent
-    fun onMessageReceived(event: MessageReceivedEvent) = runBlocking {
-        if (event.author.isBot || isThinking) {
-            return@runBlocking
-        }
-        withLocking {
+    fun onMessageReceived(event: MessageReceivedEvent) {
+        runBlocking {
+            if (event.author.isBot) {
+                return@runBlocking
+            }
             val member = event.member ?: return@runBlocking
             val textChannel = event.channel as? TextChannel ?: return@runBlocking
             val message = event.message.takeUnless { it.contentRaw.isEmpty() } ?: return@runBlocking
-            Channel.findById(textChannel.idLong) ?: return@runBlocking
+            Channel.findByChannelId(textChannel.idLong) ?: return@runBlocking
+
+            val current = System.currentTimeMillis()
+            if (current - lastMessageTime < DELAY) {
+                message.delete().queue()
+                textChannel.sendMessage("조금만 천천히 보내주세요...").mentionRepliedUser(true).queue()
+                return@runBlocking
+            }
+            lastMessageTime = current
 
             textChannel.sendTyping().queue()
+
+            val history = Chat.findAllByChannelId(textChannel.idLong).map { it.toContent() }.toList() as ArrayList
+            val part = Part("${member.nickname}: ${message.contentRaw}")
+            history.add(Content("user", arrayOf(part)))
 
             RequestBuilder.builder()
                 .model("gemini-pro")
                 .request(
-                    JSONRequest(
-                        Content(
-                            Part("${member.nickname}: ${message.contentRaw}")
-                        )
-                    ).apply { logger.info(this.toString()) }
+                    JSONRequest(history.toTypedArray())//.apply { logger.info(this.toString()) }
                 )
                 .await().use { response ->
                     val body = response.body ?: return@runBlocking
                     val byteStream = body.byteStream()
-
                     val jsonResponse = json.readTree(byteStream).let {
-                        if(it["error"] != null) {
+                        if (it["error"] != null) {
                             logger.error(it.toString())
                             return@runBlocking
                         }
-
                         json.readValue<JSONResponse>(it.toString())
                     }
 
                     val text = jsonResponse.text ?: return@runBlocking
-
-                    logger.info(jsonResponse.toString())
-
+                    //logger.info(jsonResponse.toString())
                     Chat.save(message)
-                    textChannel.sendMessage(text).queue()
+                    textChannel.sendMessage(text).queue { message ->
+                        runBlocking { Chat.save(message) }
+                    }
                 }
         }
-    }
-
-    private inline fun CoroutineScope.withLocking(block: () -> Unit) {
-        runCatching {
-            isThinking = true
-            block()
-            isThinking = false
-        }.recover {
-            logger.error("메세지 처리 중 오류가 발생했어요.", it)
-            isThinking = false
-        }
-    }
-
-    companion object {
-        private var isThinking = false;
     }
 }
