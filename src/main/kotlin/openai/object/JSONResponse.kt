@@ -5,9 +5,16 @@ data class JSONResponse(
     val candidates: ArrayList<Candidate>? = null,
     val promptFeedback: PromptFeedback? = null
 ) {
+    @Transient
     val text: String? = candidates?.get(0)?.content?.parts?.get(0)?.text
+
+    @Transient
+    val status: String? = candidates?.get(0)?.safetyRatings?.joinToString { safetyRating ->
+        "\n | ${safetyRating.category}: ${safetyRating.probability}"
+    }
+
     override fun toString(): String {
-        return "JSONResponse(candidates=$candidates, promptFeedback=$promptFeedback, text=$text)"
+        return "JSONResponse(candidates=$candidates, promptFeedback=$promptFeedback)"
     }
 }
 

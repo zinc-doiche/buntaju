@@ -43,14 +43,14 @@ class ChatListener {
 
             textChannel.sendTyping().queue()
 
-            val chats = Chat.findAllByChannelId(textChannel.idLong).toList()
+            val chats = Chat.findLatest40ByChannelId(textChannel.idLong).toList().reversed()
             val history = ArrayList(chats.map { it.toContent() }.toList())
             val part = Part("${member.nickname}: ${message.contentRaw}")
             history.add(Content("user", arrayOf(part)))
 
             val contents = if(history.size > 30) {
-                Chat.deleteBefore(chats[history.size - 30])
-                history.subList(history.size - 30, history.size - 1)
+                Chat.deleteBefore(chats[1])
+                history.subList(2, history.size)
             } else {
                 history
             }
@@ -72,7 +72,8 @@ class ChatListener {
                     }
 
                     val text = jsonResponse.text ?: return@runBlocking
-                    logger.info(jsonResponse.toString())
+                    logger.info("text: {}", text)
+                    logger.info(jsonResponse.status)
                     Chat.save(message)
                     textChannel.sendMessage(text).queue { message ->
                         runBlocking { Chat.save(message) }

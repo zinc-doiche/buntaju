@@ -1,6 +1,7 @@
 package zinc.doiche.chat.`object`
 
 import com.mongodb.client.model.DeleteOptions
+import com.mongodb.client.model.Sorts
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.firstOrNull
 import net.dv8tion.jda.api.entities.Message
@@ -33,7 +34,7 @@ data class Chat(
 
     val isUser = senderId != jda.selfUser.idLong
 
-    fun toContent() = Content(if(isUser) "user" else "model", arrayOf(Part("$senderName: $content")))
+    fun toContent() = Content(if(isUser) "user" else "model", arrayOf(Part("${if(isUser) "$senderName:" else ""} $content")))
 
     companion object : Collectable<Message, Chat> {
         override val collection: MongoCollection<Chat> = MongoDB.getCollection<Chat>("messages")
@@ -53,6 +54,10 @@ data class Chat(
         suspend fun save(chat: Chat) = collection.insertOne(chat)
 
         fun findAllByChannelId(channelId: Long) = collection.find(Chat::channelId eq channelId)
+
+        fun findLatest40ByChannelId(channelId: Long) = collection.find(Chat::channelId eq channelId)
+            .sort(Sorts.descending("_id"))
+            .limit(40)
 
         suspend fun update(chat: Chat) = collection.updateOne(Chat::id eq chat.id, set(chat))
 
