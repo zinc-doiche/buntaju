@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import net.dv8tion.jda.api.entities.Message
 import org.bson.BsonObjectId
 import org.bson.codecs.pojo.annotations.BsonId
+import zinc.doiche.chat.listener.ChatListener
 import zinc.doiche.jda
 import zinc.doiche.lib.database.*
 import zinc.doiche.lib.database.eq
@@ -35,6 +36,8 @@ data class Chat(
     val isUser = senderId != jda.selfUser.idLong
 
     fun toContent() = Content(if(isUser) "user" else "model", arrayOf(Part("${if(isUser) "$senderName:" else ""} $content")))
+
+    fun toMessage() = ChatListener.Message(if(isUser) "user" else "assistant", "${if(isUser) "$senderName: " else ""}$content")
 
     companion object : Collectable<Message, Chat> {
         override val collection: MongoCollection<Chat> = MongoDB.getCollection<Chat>("messages")

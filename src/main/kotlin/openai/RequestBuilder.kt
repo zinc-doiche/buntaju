@@ -19,7 +19,7 @@ class RequestBuilder private constructor() {
         return this
     }
 
-    fun request(obj: Any): Deferred<Response> = runBlocking {
+    fun requestGemini(obj: Any): Deferred<Response> = runBlocking {
         async {
             Request.Builder()
                 .method(
@@ -28,6 +28,22 @@ class RequestBuilder private constructor() {
                 )
                 .url("$API_URL$model:generateContent?key=$aiToken")
                 .addHeader("Content-Type", "application/json")
+                .build().let {
+                    jda.httpClient.newCall(it).execute()
+                }
+        }
+    }
+
+    fun requestGPT(obj: Any): Deferred<Response> = runBlocking {
+        async {
+            Request.Builder()
+                .method(
+                    "POST", json.writeValueAsString(obj)
+                        .toRequestBody("application/json".toMediaType())
+                )
+                .url("https://api.openai.com/v1/chat/completions")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization", "Bearer $aiToken")
                 .build().let {
                     jda.httpClient.newCall(it).execute()
                 }

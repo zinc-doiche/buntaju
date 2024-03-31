@@ -31,6 +31,7 @@ tasks {
         manifest {
             attributes("Main-Class" to "zinc.doiche.MainKt")
         }
+        destinationDirectory = file("Y:\\home\\buntaju\\server")
     }
     java {
         toolchain.languageVersion.set(JavaLanguageVersion.of(17))
